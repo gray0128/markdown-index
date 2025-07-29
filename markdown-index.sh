@@ -14,6 +14,9 @@
 
 set -euo pipefail
 
+# 配置：设置从哪个级别开始编号（1=从一级标题开始，2=从二级标题开始）
+START_LEVEL=2
+
 # 获取剪贴板内容
 content=$(pbpaste)
 
@@ -49,8 +52,8 @@ while IFS= read -r line; do
         continue
     fi
     
-    # 检查是否为标题行
-    if [[ "$line" =~ ^(#{1,6})[[:space:]]+(.*)$ ]]; then
+    # 检查是否为标题行（根据配置从指定级别开始）
+    if [[ "$line" =~ ^(#{${START_LEVEL},6})[[:space:]]+(.*)$ ]]; then
         # 提取标题级别和内容
         hashes="${BASH_REMATCH[1]}"
         title_content="${BASH_REMATCH[2]}"
@@ -68,9 +71,9 @@ while IFS= read -r line; do
             counters[$((i-1))]=0
         done
         
-        # 生成序号
+        # 生成序号（从配置的级别开始计算）
         index_number=""
-        for ((i=1; i<=level; i++)); do
+        for ((i=${START_LEVEL}; i<=level; i++)); do
             if [[ ${counters[$((i-1))]} -gt 0 ]]; then
                 if [[ -n "$index_number" ]]; then
                     index_number="${index_number}.${counters[$((i-1))]}"
